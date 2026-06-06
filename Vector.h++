@@ -35,6 +35,8 @@ public:
 	T operator[](unsigned index);
 
 	void reserve(unsigned newCap);
+	void resize(unsigned size);
+	void resize(unsigned size, T elem);
 
 	void pushBack(T elem);
 	void insert(unsigned index, T elem);
@@ -76,6 +78,26 @@ template <typename T>
 void Vector<T>::reserve(unsigned newCap) {
 	if (newCap > cap)
 		grow(newCap);
+}
+
+
+template <typename T>
+void Vector<T>::resize(unsigned size) {
+	if (size > cap)
+		grow(size);
+	for (unsigned i = len; i < size; i++)
+		ar[i] = T{};
+	len = size;
+}
+
+
+template <typename T>
+void Vector<T>::resize(unsigned size, T elem) {
+	if (size > cap)
+		grow(size);
+	for (unsigned i = len; i < size; i++)
+		ar[i] = elem;
+	len = size;
 }
 
 
