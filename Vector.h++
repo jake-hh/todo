@@ -38,6 +38,8 @@ public:
 	void resize(unsigned size);
 	void resize(unsigned size, T elem);
 
+	void clear();
+
 	void pushBack(T elem);
 	void insert(unsigned index, T elem);
 
@@ -98,6 +100,12 @@ void Vector<T>::resize(unsigned size, T elem) {
 	for (unsigned i = len; i < size; i++)
 		ar[i] = elem;
 	len = size;
+}
+
+
+template <typename T>
+void Vector<T>::clear() {
+	len = 0;
 }
 
 
