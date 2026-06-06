@@ -8,9 +8,10 @@
 #define GROWTH_FACTOR	2u
 
 
+template <typename T>
 class Vector {
 private:
-	int *ar;
+	T *ar;
 	unsigned cap;
 	unsigned len;
 
@@ -21,35 +22,38 @@ public:
 	unsigned capacity()	{ return cap; }
 	bool isEmpty()		{ return len == 0; }
 
-	int at(unsigned index);
+	T at(unsigned index);
 
 	void reserve(unsigned newCap);
 
-	void pushBack(int elem);
-	void insert(unsigned index, int elem);
+	void pushBack(T elem);
+	void insert(unsigned index, T elem);
 
 };
 
 
-Vector::Vector() {
-	ar = new int[INITIAL_CAP];
+template <typename T>
+Vector<T>::Vector() {
+	ar = new T[INITIAL_CAP];
 	cap = INITIAL_CAP;
 	len = 0;
 }
 
 
-int Vector::at(unsigned index) {
+template <typename T>
+T Vector<T>::at(unsigned index) {
 	if (index >= len)
 		throw std::out_of_range("index out of range");
 	return ar[index];
 }
 
 
-void Vector::reserve(unsigned newCap) {
+template <typename T>
+void Vector<T>::reserve(unsigned newCap) {
 	if (newCap <= cap)
 		return;
 
-	int *newAr = new int[newCap];
+	T *newAr = new T[newCap];
 	std::move(ar, ar+len, newAr);
 
 	delete[] ar;
@@ -59,7 +63,8 @@ void Vector::reserve(unsigned newCap) {
 }
 
 
-void Vector::pushBack(int elem) {
+template <typename T>
+void Vector<T>::pushBack(T elem) {
 	if (len >= cap)
 		reserve(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
 
@@ -67,7 +72,8 @@ void Vector::pushBack(int elem) {
 }
 
 
-void Vector::insert(unsigned index, int elem) {
+template <typename T>
+void Vector<T>::insert(unsigned index, T elem) {
 	if (index > len)
 		throw std::out_of_range("index out of range");
 

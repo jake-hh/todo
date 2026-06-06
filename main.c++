@@ -3,7 +3,8 @@
 using namespace std;
 
 
-void status(Vector &v) {
+template <typename T>
+void status(Vector<T> &v) {
 	cout << "cap: " << v.capacity() << "\tsize: " << v.size() << "\t ar:";
 
 	if (v.isEmpty())
@@ -18,7 +19,7 @@ void status(Vector &v) {
 
 int main() {
 
-	Vector v;
+	Vector<int> v;
 	status(v);
 
 	v.reserve(8);
@@ -35,6 +36,13 @@ int main() {
 
 	v.insert(v.size(), 50);
 	status(v);
+
+	cout << "\n--- double ---" << endl;
+	Vector<double> d;
+	d.pushBack(1.1);
+	d.pushBack(2.2);
+	d.pushBack(3.3);
+	status(d);
 
 	return 0;
 }
