@@ -2,32 +2,32 @@
 #define VECTOR_H_
 
 #include <iostream>
+#include <stdexcept>
 
-#define INITIAL_CAP		16
-#define GROWTH_FACTOR	2
+#define INITIAL_CAP		16u
+#define GROWTH_FACTOR	2u
 
 
 class Vector {
 private:
 	int *ar;
-	int cap;
-	int len;
+	unsigned cap;
+	unsigned len;
 
 public:
 	Vector();
 
-	int size()			{ return len; }
-	int reserved()		{ return cap; }
-	bool empty()		{ return len <= 0; }
+	unsigned size()		{ return len; }
+	unsigned capacity()	{ return cap; }
+	bool isEmpty()		{ return len == 0; }
 
-	int at(int pos);
+	int at(unsigned index);
 
-	void resize(int newCap);
+	void reserve(unsigned newCap);
 
-	void push(int x);
-	void insert(int x, int pos);
+	void pushBack(int elem);
+	void insert(unsigned index, int elem);
 
-	void test();
 };
 
 
@@ -38,54 +38,46 @@ Vector::Vector() {
 }
 
 
-int Vector::at(int pos) {
-	if (pos >= len)
-		return 0;		// TODO: throw error
-	else
-		return ar[pos];
+int Vector::at(unsigned index) {
+	if (index >= len)
+		throw std::out_of_range("index out of range");
+	return ar[index];
 }
 
 
-void Vector::resize(int newCap) {
-	if (newCap < len)
-		newCap = len;
+void Vector::reserve(unsigned newCap) {
+	if (newCap <= cap)
+		return;
 
 	int *newAr = new int[newCap];
 	std::move(ar, ar+len, newAr);
 
-	delete ar;
+	delete[] ar;
 
 	ar = newAr;
 	cap = newCap;
 }
 
 
-void Vector::push(int x) {
+void Vector::pushBack(int elem) {
 	if (len >= cap)
-		resize(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
-	
-	ar[len++] = x;
+		reserve(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
+
+	ar[len++] = elem;
 }
 
 
-void Vector::insert(int x, int pos) {
-	if (pos < 0)
-		pos = 0;		// TODO: throw error
-	else if (pos > len)
-		pos = len;		// TODO: throw error
+void Vector::insert(unsigned index, int elem) {
+	if (index > len)
+		throw std::out_of_range("index out of range");
 
 	if (len >= cap)
-		resize(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
+		reserve(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
 
-	std::move(ar+pos, ar+len, ar+pos+1);
+	std::move(ar+index, ar+len, ar+index+1);
 
-	ar[pos] = x;
+	ar[index] = elem;
 	len++;
-}
-
-
-void Vector::test() {
-	std::cout << "Hello World" << std::endl;
 }
 
 #endif
