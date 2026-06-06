@@ -32,6 +32,7 @@ public:
 	bool isEmpty()		{ return len == 0; }
 
 	T at(unsigned index);
+	T operator[](unsigned index);
 
 	void reserve(unsigned newCap);
 
@@ -54,6 +55,12 @@ Vector<T>::Vector(unsigned size) {
 	ar = new T[size];
 	cap = size;
 	len = 0;
+}
+
+
+template <typename T>
+T Vector<T>::operator[](unsigned index) {
+	return ar[index];
 }
 
 
