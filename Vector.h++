@@ -15,8 +15,17 @@ private:
 	unsigned cap;
 	unsigned len;
 
+	void grow(unsigned newCap) {
+		T *newAr = new T[newCap];
+		std::move(ar, ar+len, newAr);
+		delete[] ar;
+		ar = newAr;
+		cap = newCap;
+	}
+
 public:
 	Vector();
+	Vector(unsigned size);
 
 	unsigned size()		{ return len; }
 	unsigned capacity()	{ return cap; }
@@ -41,6 +50,14 @@ Vector<T>::Vector() {
 
 
 template <typename T>
+Vector<T>::Vector(unsigned size) {
+	ar = new T[size];
+	cap = size;
+	len = 0;
+}
+
+
+template <typename T>
 T Vector<T>::at(unsigned index) {
 	if (index >= len)
 		throw std::out_of_range("index out of range");
@@ -50,23 +67,15 @@ T Vector<T>::at(unsigned index) {
 
 template <typename T>
 void Vector<T>::reserve(unsigned newCap) {
-	if (newCap <= cap)
-		return;
-
-	T *newAr = new T[newCap];
-	std::move(ar, ar+len, newAr);
-
-	delete[] ar;
-
-	ar = newAr;
-	cap = newCap;
+	if (newCap > cap)
+		grow(newCap);
 }
 
 
 template <typename T>
 void Vector<T>::pushBack(T elem) {
 	if (len >= cap)
-		reserve(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
+		grow(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
 
 	ar[len++] = elem;
 }
@@ -78,7 +87,7 @@ void Vector<T>::insert(unsigned index, T elem) {
 		throw std::out_of_range("index out of range");
 
 	if (len >= cap)
-		reserve(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
+		grow(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
 
 	std::move(ar+index, ar+len, ar+index+1);
 
