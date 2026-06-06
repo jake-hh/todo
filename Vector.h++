@@ -154,7 +154,7 @@ void Vector<T>::erase(unsigned index) {
 
 template <typename T>
 void Vector<T>::erase(unsigned index, unsigned amount) {
-	if (index + amount > len)
+	if (index > len || amount > len - index)
 		throw std::out_of_range("index out of range");
 	std::move(ar+index+amount, ar+len, ar+index);
 	for (unsigned i = len - amount; i < len; i++)
@@ -165,6 +165,8 @@ void Vector<T>::erase(unsigned index, unsigned amount) {
 
 template <typename T>
 void Vector<T>::popBack() {
+	if (len == 0)
+		throw std::out_of_range("vector is empty");
 	ar[--len].~T();
 }
 
