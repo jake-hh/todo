@@ -1,10 +1,11 @@
-#include "Vector.h++"
+#include "../smartArray/SmartArray.h"
+#include <iostream>
 
 using namespace std;
 
 
 template <typename T>
-void status(Vector<T> &v) {
+void status(SmartArray<T> &v) {
 	cout << "cap: " << v.capacity() << "\tsize: " << v.size() << "\tar:";
 
 	if (v.isEmpty())
@@ -20,7 +21,7 @@ void status(Vector<T> &v) {
 int main() {
 
 	// default constructor
-	Vector<int> v;
+	SmartArray<int> v;
 	status(v);
 
 	// reserve
@@ -69,14 +70,14 @@ int main() {
 	status(v);
 
 	// sized constructor
-	Vector<int> w(4);
+	SmartArray<int> w(4);
 	w.pushBack(10);
 	w.pushBack(20);
 	status(w);
 
 	// double vector
 	cout << "\n--- double ---" << endl;
-	Vector<double> d;
+	SmartArray<double> d;
 	d.pushBack(1.1);
 	d.pushBack(2.2);
 	d.pushBack(3.3);

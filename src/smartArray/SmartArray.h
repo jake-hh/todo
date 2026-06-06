@@ -1,5 +1,5 @@
-#ifndef VECTOR_H_
-#define VECTOR_H_
+#ifndef SMARTARRAY_H
+#define SMARTARRAY_H
 
 #include <iostream>
 #include <stdexcept>
@@ -9,7 +9,7 @@
 
 
 template <typename T>
-class Vector {
+class SmartArray {
 private:
 	T *ar;
 	unsigned cap;
@@ -24,8 +24,8 @@ private:
 	}
 
 public:
-	Vector();
-	Vector(unsigned size);
+	SmartArray();
+	SmartArray(unsigned size);
 
 	unsigned size()		{ return len; }
 	unsigned capacity()	{ return cap; }
@@ -51,7 +51,7 @@ public:
 
 
 template <typename T>
-Vector<T>::Vector() {
+SmartArray<T>::SmartArray() {
 	ar = new T[INITIAL_CAP];
 	cap = INITIAL_CAP;
 	len = 0;
@@ -59,7 +59,7 @@ Vector<T>::Vector() {
 
 
 template <typename T>
-Vector<T>::Vector(unsigned size) {
+SmartArray<T>::SmartArray(unsigned size) {
 	ar = new T[size];
 	cap = size;
 	len = 0;
@@ -67,13 +67,13 @@ Vector<T>::Vector(unsigned size) {
 
 
 template <typename T>
-T Vector<T>::operator[](unsigned index) {
+T SmartArray<T>::operator[](unsigned index) {
 	return ar[index];
 }
 
 
 template <typename T>
-T Vector<T>::at(unsigned index) {
+T SmartArray<T>::at(unsigned index) {
 	if (index >= len)
 		throw std::out_of_range("index out of range");
 	return ar[index];
@@ -81,14 +81,14 @@ T Vector<T>::at(unsigned index) {
 
 
 template <typename T>
-void Vector<T>::reserve(unsigned newCap) {
+void SmartArray<T>::reserve(unsigned newCap) {
 	if (newCap > cap)
 		grow(newCap);
 }
 
 
 template <typename T>
-void Vector<T>::resize(unsigned size) {
+void SmartArray<T>::resize(unsigned size) {
 	if (size > cap)
 		grow(size);
 	for (unsigned i = len; i < size; i++)
@@ -100,7 +100,7 @@ void Vector<T>::resize(unsigned size) {
 
 
 template <typename T>
-void Vector<T>::resize(unsigned size, T elem) {
+void SmartArray<T>::resize(unsigned size, T elem) {
 	if (size > cap)
 		grow(size);
 	for (unsigned i = len; i < size; i++)
@@ -112,7 +112,7 @@ void Vector<T>::resize(unsigned size, T elem) {
 
 
 template <typename T>
-void Vector<T>::clear() {
+void SmartArray<T>::clear() {
 	for (unsigned i = 0; i < len; i++)
 		ar[i].~T();
 	len = 0;
@@ -120,7 +120,7 @@ void Vector<T>::clear() {
 
 
 template <typename T>
-void Vector<T>::pushBack(T elem) {
+void SmartArray<T>::pushBack(T elem) {
 	if (len >= cap)
 		grow(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
 
@@ -129,7 +129,7 @@ void Vector<T>::pushBack(T elem) {
 
 
 template <typename T>
-void Vector<T>::insert(unsigned index, T elem) {
+void SmartArray<T>::insert(unsigned index, T elem) {
 	if (index > len)
 		throw std::out_of_range("index out of range");
 
@@ -144,7 +144,7 @@ void Vector<T>::insert(unsigned index, T elem) {
 
 
 template <typename T>
-void Vector<T>::erase(unsigned index) {
+void SmartArray<T>::erase(unsigned index) {
 	if (index >= len)
 		throw std::out_of_range("index out of range");
 	std::move(ar+index+1, ar+len, ar+index);
@@ -153,7 +153,7 @@ void Vector<T>::erase(unsigned index) {
 
 
 template <typename T>
-void Vector<T>::erase(unsigned index, unsigned amount) {
+void SmartArray<T>::erase(unsigned index, unsigned amount) {
 	if (index > len || amount > len - index)
 		throw std::out_of_range("index out of range");
 	std::move(ar+index+amount, ar+len, ar+index);
@@ -164,7 +164,7 @@ void Vector<T>::erase(unsigned index, unsigned amount) {
 
 
 template <typename T>
-void Vector<T>::popBack() {
+void SmartArray<T>::popBack() {
 	if (len == 0)
 		throw std::out_of_range("vector is empty");
 	ar[--len].~T();

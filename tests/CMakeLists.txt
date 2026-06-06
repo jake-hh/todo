@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.20)
+
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/releases/download/v1.17.0/googletest-1.17.0.tar.gz
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+include(CTest)
+enable_testing()
+
+add_executable(exampleTests exampleTests.cpp)
+
+target_link_libraries(exampleTests GTest::gtest_main SmartArray)
+
+
+include(GoogleTest)
+gtest_discover_tests(exampleTests)
