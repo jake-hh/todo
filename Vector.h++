@@ -43,6 +43,10 @@ public:
 	void pushBack(T elem);
 	void insert(unsigned index, T elem);
 
+	void erase(unsigned index);
+	void erase(unsigned index, unsigned amount);
+	void popBack();
+
 };
 
 
@@ -89,6 +93,8 @@ void Vector<T>::resize(unsigned size) {
 		grow(size);
 	for (unsigned i = len; i < size; i++)
 		ar[i] = T{};
+	for (unsigned i = size; i < len; i++)
+		ar[i].~T();
 	len = size;
 }
 
@@ -99,12 +105,16 @@ void Vector<T>::resize(unsigned size, T elem) {
 		grow(size);
 	for (unsigned i = len; i < size; i++)
 		ar[i] = elem;
+	for (unsigned i = size; i < len; i++)
+		ar[i].~T();
 	len = size;
 }
 
 
 template <typename T>
 void Vector<T>::clear() {
+	for (unsigned i = 0; i < len; i++)
+		ar[i].~T();
 	len = 0;
 }
 
@@ -130,6 +140,32 @@ void Vector<T>::insert(unsigned index, T elem) {
 
 	ar[index] = elem;
 	len++;
+}
+
+
+template <typename T>
+void Vector<T>::erase(unsigned index) {
+	if (index >= len)
+		throw std::out_of_range("index out of range");
+	std::move(ar+index+1, ar+len, ar+index);
+	ar[--len].~T();
+}
+
+
+template <typename T>
+void Vector<T>::erase(unsigned index, unsigned amount) {
+	if (index + amount > len)
+		throw std::out_of_range("index out of range");
+	std::move(ar+index+amount, ar+len, ar+index);
+	for (unsigned i = len - amount; i < len; i++)
+		ar[i].~T();
+	len -= amount;
+}
+
+
+template <typename T>
+void Vector<T>::popBack() {
+	ar[--len].~T();
 }
 
 #endif
