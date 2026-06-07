@@ -277,7 +277,7 @@ void SmartArray<T>::shrinkToFit() {
 
 template <typename T>
 void SmartArray<T>::pushFront(T elem) {
-	insert(0, elem);
+	insert(0, std::move(elem));
 }
 
 
