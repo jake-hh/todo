@@ -14,20 +14,7 @@ private:
 	unsigned cap;
 	unsigned len;
 
-	void grow(unsigned newCap) {
-		// allocate extra space
-		T *newAr = static_cast<T*>(::operator new(newCap * sizeof(T)));
-
-		// copy data
-		std::uninitialized_move(ar, ar + len, newAr);
-
-		// destroy objects & free space
-		std::destroy(ar, ar + len);
-		::operator delete(ar);
-
-		ar = newAr;
-		cap = newCap;
-	}
+	void _changeCap(unsigned newCap);
 
 public:
 	SmartArray();
@@ -35,14 +22,14 @@ public:
 	SmartArray(unsigned size, const T& elem);
 	~SmartArray();
 
-	unsigned size() const		{ return len; }
-	unsigned capacity() const	{ return cap; }
-	bool isEmpty() const		{ return len == 0; }
+	unsigned size() const      { return len; }
+	unsigned capacity() const  { return cap; }
+	bool isEmpty() const       { return len == 0; }
 
-	T* begin()             { return ar; }
-	T* end()               { return ar + len; }
-	const T* begin() const { return ar; }
-	const T* end()   const { return ar + len; }
+	T* begin()                 { return ar; }
+	T* end()                   { return ar + len; }
+	const T* begin() const     { return ar; }
+	const T* end()   const     { return ar + len; }
 
 	T& at(unsigned index);
 	const T& at(unsigned index) const;
@@ -56,18 +43,34 @@ public:
 	void resize(unsigned size, const T& elem);
 	void shrinkToFit();
 
-	void clear();
-
 	void pushBack(T elem);
 	void pushFront(T elem);
 	void insert(unsigned index, T elem);
 
+	void clear();
 	void erase(unsigned index);
 	void erase(unsigned index, unsigned amount);
 	void popBack();
 	void popFront();
-
 };
+
+
+template <typename T>
+void SmartArray<T>::_changeCap(unsigned newCap) {
+	// allocate extra space
+	T *newAr = static_cast<T*>(::operator new(newCap * sizeof(T)));
+
+	// copy data
+	std::uninitialized_move(ar, ar + len, newAr);
+
+	// destroy objects & free space
+	std::destroy(ar, ar + len);
+	::operator delete(ar);
+
+	ar = newAr;
+	cap = newCap;
+}
+
 
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const SmartArray<T>& a) {
@@ -136,14 +139,14 @@ const T& SmartArray<T>::at(unsigned index) const {
 template <typename T>
 void SmartArray<T>::reserve(unsigned newCap) {
 	if (newCap > cap)
-		grow(newCap);
+		_changeCap(newCap);
 }
 
 
 template <typename T>
 void SmartArray<T>::resize(unsigned size) {
 	if (size > cap)
-		grow(size);
+		_changeCap(size);
 
 	if (size > len)
 		// create objects
@@ -159,7 +162,7 @@ void SmartArray<T>::resize(unsigned size) {
 template <typename T>
 void SmartArray<T>::resize(unsigned size, const T& elem) {
 	if (size > cap)
-		grow(size);
+		_changeCap(size);
 
 	if (size > len)
 		// create objects
@@ -184,7 +187,7 @@ void SmartArray<T>::clear() {
 template <typename T>
 void SmartArray<T>::pushBack(T elem) {
 	if (len >= cap)
-		grow(cap == 0 ? 1 : cap * GROWTH_FACTOR);
+		_changeCap(cap == 0 ? 1 : cap * GROWTH_FACTOR);
 
 	new (ar + len) T(std::move(elem));
 	len++;
@@ -197,7 +200,7 @@ void SmartArray<T>::insert(unsigned index, T elem) {
 		throw std::out_of_range("index out of range");
 
 	if (len >= cap)
-		grow(cap == 0 ? 1 : cap * GROWTH_FACTOR);
+		_changeCap(cap == 0 ? 1 : cap * GROWTH_FACTOR);
 
 	if (index == len) {
 		new (ar + len) T(std::move(elem));
@@ -275,7 +278,7 @@ bool SmartArray<T>::operator==(const SmartArray<T>& other) const {
 template <typename T>
 void SmartArray<T>::shrinkToFit() {
 	if (cap > len)
-		grow(len);
+		_changeCap(len);
 }
 
 
