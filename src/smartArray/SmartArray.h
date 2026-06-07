@@ -103,21 +103,22 @@ SmartArray<T>::SmartArray(unsigned size) {
 
 
 template <typename T>
+SmartArray<T>::SmartArray(unsigned size, const T& elem) {
+	// allocate space
+	ar = static_cast<T*>(::operator new(size * sizeof(T)));
+
+	cap = size;
+	len = size;
+
+	std::uninitialized_fill(ar, ar + size, elem);
+}
+
+
+template <typename T>
 SmartArray<T>::~SmartArray() {
 	// destroy objects & free space
 	std::destroy(ar, ar + len);
 	::operator delete(ar);
-}
-
-
-template <typename T>
-T& SmartArray<T>::operator[](unsigned index) {
-	return ar[index];
-}
-
-template <typename T>
-const T& SmartArray<T>::operator[](unsigned index) const {
-	return ar[index];
 }
 
 
@@ -133,6 +134,28 @@ const T& SmartArray<T>::at(unsigned index) const {
 	if (index >= len)
 		throw std::out_of_range("index out of range");
 	return ar[index];
+}
+
+
+template <typename T>
+T& SmartArray<T>::operator[](unsigned index) {
+	return ar[index];
+}
+
+template <typename T>
+const T& SmartArray<T>::operator[](unsigned index) const {
+	return ar[index];
+}
+
+
+template <typename T>
+bool SmartArray<T>::operator==(const SmartArray<T>& other) const {
+	if (len != other.len)
+		return false;
+	for (unsigned i = 0; i < len; i++)
+		if (ar[i] != other.ar[i])
+			return false;
+	return true;
 }
 
 
@@ -176,11 +199,9 @@ void SmartArray<T>::resize(unsigned size, const T& elem) {
 
 
 template <typename T>
-void SmartArray<T>::clear() {
-	// destroy all objects
-	std::destroy(ar, ar + len);
-
-	len = 0;
+void SmartArray<T>::shrinkToFit() {
+	if (cap > len)
+		_changeCap(len);
 }
 
 
@@ -191,6 +212,12 @@ void SmartArray<T>::pushBack(T elem) {
 
 	new (ar + len) T(std::move(elem));
 	len++;
+}
+
+
+template <typename T>
+void SmartArray<T>::pushFront(T elem) {
+	insert(0, std::move(elem));
 }
 
 
@@ -212,6 +239,15 @@ void SmartArray<T>::insert(unsigned index, T elem) {
 		ar[index] = std::move(elem);
 	}
 	len++;
+}
+
+
+template <typename T>
+void SmartArray<T>::clear() {
+	// destroy all objects
+	std::destroy(ar, ar + len);
+
+	len = 0;
 }
 
 
@@ -249,42 +285,6 @@ void SmartArray<T>::popBack() {
 
 	// destroy last object
 	std::destroy_at(ar + --len);
-}
-
-
-template <typename T>
-SmartArray<T>::SmartArray(unsigned size, const T& elem) {
-	// allocate space
-	ar = static_cast<T*>(::operator new(size * sizeof(T)));
-
-	cap = size;
-	len = size;
-
-	std::uninitialized_fill(ar, ar + size, elem);
-}
-
-
-template <typename T>
-bool SmartArray<T>::operator==(const SmartArray<T>& other) const {
-	if (len != other.len)
-		return false;
-	for (unsigned i = 0; i < len; i++)
-		if (ar[i] != other.ar[i])
-			return false;
-	return true;
-}
-
-
-template <typename T>
-void SmartArray<T>::shrinkToFit() {
-	if (cap > len)
-		_changeCap(len);
-}
-
-
-template <typename T>
-void SmartArray<T>::pushFront(T elem) {
-	insert(0, std::move(elem));
 }
 
 
