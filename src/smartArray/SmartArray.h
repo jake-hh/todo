@@ -154,6 +154,8 @@ void SmartArray<T>::erase(unsigned index) {
 
 template <typename T>
 void SmartArray<T>::erase(unsigned index, unsigned amount) {
+	if (amount == 0)
+		return;
 	if (index > len || amount > len - index)
 		throw std::out_of_range("index out of range");
 	std::move(ar+index+amount, ar+len, ar+index);
