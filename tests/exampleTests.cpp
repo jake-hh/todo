@@ -284,3 +284,84 @@ TYPED_TEST(SmartArrayTest, EraseZeroCount) {
     EXPECT_EQ(a.at(0), val<TypeParam>(1));
     EXPECT_EQ(a.at(1), val<TypeParam>(2));
 }
+
+TYPED_TEST(SmartArrayTest, InsertIntoEmpty) {
+    SmartArray<TypeParam> a;
+    a.insert(0u, val<TypeParam>(1));
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+}
+
+TYPED_TEST(SmartArrayTest, EraseAtHead) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    a.erase(0u);
+    EXPECT_EQ(a.size(), 2u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(2));
+    EXPECT_EQ(a.at(1), val<TypeParam>(3));
+}
+
+TYPED_TEST(SmartArrayTest, ReservePreservesElements) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(42));
+    a.reserve(32u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(42));
+}
+
+TYPED_TEST(SmartArrayTest, ResizeGrowTriggersGrow) {
+    SmartArray<TypeParam> a(2u);
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.resize(5u, val<TypeParam>(9));
+    EXPECT_EQ(a.size(), 5u);
+    EXPECT_GE(a.capacity(), 5u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(1), val<TypeParam>(2));
+    EXPECT_EQ(a.at(2), val<TypeParam>(9));
+    EXPECT_EQ(a.at(4), val<TypeParam>(9));
+}
+
+TYPED_TEST(SmartArrayTest, SizeConstructorZeroThenPushBack) {
+    SmartArray<TypeParam> a(0u);
+    EXPECT_EQ(a.capacity(), 0u);
+    a.pushBack(val<TypeParam>(1));
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_GE(a.capacity(), 1u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+}
+
+TYPED_TEST(SmartArrayTest, EraseOnEmptyThrows) {
+    SmartArray<TypeParam> a;
+    EXPECT_THROW(a.erase(0u), std::out_of_range);
+}
+
+TYPED_TEST(SmartArrayTest, ResizeToZero) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.resize(0u);
+    EXPECT_EQ(a.size(), 0u);
+    EXPECT_TRUE(a.isEmpty());
+}
+
+TYPED_TEST(SmartArrayTest, EraseRangeAll) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    a.erase(0u, 3u);
+    EXPECT_EQ(a.size(), 0u);
+    EXPECT_TRUE(a.isEmpty());
+}
+
+TYPED_TEST(SmartArrayTest, EraseRangeOnEmptyThrows) {
+    SmartArray<TypeParam> a;
+    EXPECT_THROW(a.erase(0u, 1u), std::out_of_range);
+}
+
+TYPED_TEST(SmartArrayTest, InsertOutOfRangeOnEmptyThrows) {
+    SmartArray<TypeParam> a;
+    EXPECT_THROW(a.insert(1u, val<TypeParam>(1)), std::out_of_range);
+}
