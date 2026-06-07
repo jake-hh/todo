@@ -155,6 +155,62 @@ TYPED_TEST(SmartArrayTest, ReserveNoOpWhenEqual) {
     EXPECT_EQ(a.capacity(), capBefore);
 }
 
+// ── Step 8: erase ────────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, EraseSingleShifts) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    a.erase(1u);
+    EXPECT_EQ(a.size(), 2u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(1), val<TypeParam>(3));
+}
+
+TYPED_TEST(SmartArrayTest, EraseSingleOutOfRangeThrows) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    EXPECT_THROW(a.erase(5u), std::out_of_range);
+}
+
+TYPED_TEST(SmartArrayTest, EraseRangeShifts) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    a.pushBack(val<TypeParam>(4));
+    a.erase(1u, 2u);
+    EXPECT_EQ(a.size(), 2u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(1), val<TypeParam>(4));
+}
+
+TYPED_TEST(SmartArrayTest, EraseRangeOutOfRangeThrows) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    EXPECT_THROW(a.erase(1u, 5u), std::out_of_range);
+}
+
+// ── Step 9: popBack / at out-of-range ────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, PopBackDecreasesSize) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    unsigned capBefore = a.capacity();
+    a.popBack();
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_EQ(a.capacity(), capBefore);
+}
+
+TYPED_TEST(SmartArrayTest, AtOutOfRangeThrows) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    EXPECT_THROW(a.at(5u), std::out_of_range);
+}
+
 // ── Step 3: pushBack past capacity ───────────────────────────────────────────
 
 TYPED_TEST(SmartArrayTest, PushBackGrowsCapacity) {
