@@ -32,7 +32,7 @@ private:
 public:
 	SmartArray();
 	SmartArray(unsigned size);
-	SmartArray(unsigned size, T elem);
+	SmartArray(unsigned size, const T& elem);
 	~SmartArray();
 
 	unsigned size() const		{ return len; }
@@ -48,7 +48,7 @@ public:
 
 	void reserve(unsigned newCap);
 	void resize(unsigned size);
-	void resize(unsigned size, T elem);
+	void resize(unsigned size, const T& elem);
 	void shrinkToFit();
 
 	void clear();
@@ -152,7 +152,7 @@ void SmartArray<T>::resize(unsigned size) {
 
 
 template <typename T>
-void SmartArray<T>::resize(unsigned size, T elem) {
+void SmartArray<T>::resize(unsigned size, const T& elem) {
 	if (size > cap)
 		grow(size);
 
@@ -245,7 +245,7 @@ void SmartArray<T>::popBack() {
 
 
 template <typename T>
-SmartArray<T>::SmartArray(unsigned size, T elem) {
+SmartArray<T>::SmartArray(unsigned size, const T& elem) {
 	// allocate space
 	ar = static_cast<T*>(::operator new(size * sizeof(T)));
 
