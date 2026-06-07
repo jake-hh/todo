@@ -12,10 +12,10 @@ FetchContent_MakeAvailable(googletest)
 include(CTest)
 enable_testing()
 
-add_executable(exampleTests exampleTests.cpp)
+add_executable(smartArrayTests smartArrayTests.cpp)
 
-target_link_libraries(exampleTests GTest::gtest_main SmartArray)
+target_link_libraries(smartArrayTests GTest::gtest_main SmartArray)
 
 
 include(GoogleTest)
-gtest_discover_tests(exampleTests)
+gtest_discover_tests(smartArrayTests)
