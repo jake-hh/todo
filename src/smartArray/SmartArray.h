@@ -2,6 +2,7 @@
 #define SMARTARRAY_H
 
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 
 #define INITIAL_CAP		16u
@@ -16,9 +17,16 @@ private:
 	unsigned len;
 
 	void grow(unsigned newCap) {
-		T *newAr = new T[newCap];
-		std::move(ar, ar+len, newAr);
-		delete[] ar;
+		// allocate extra space
+		T *newAr = static_cast<T*>(::operator new(newCap * sizeof(T)));
+
+		// copy data
+		std::uninitialized_move(ar, ar + len, newAr);
+
+		// destroy objects & free space
+		std::destroy(ar, ar + len);
+		::operator delete(ar);
+
 		ar = newAr;
 		cap = newCap;
 	}
@@ -27,6 +35,7 @@ public:
 	SmartArray();
 	SmartArray(unsigned size);
 	SmartArray(unsigned size, T elem);
+	~SmartArray();
 
 	unsigned size()		{ return len; }
 	unsigned capacity()	{ return cap; }
@@ -69,7 +78,8 @@ std::ostream& operator<<(std::ostream& os, SmartArray<T>& a) {
 
 template <typename T>
 SmartArray<T>::SmartArray() {
-	ar = new T[INITIAL_CAP];
+	// allocate space
+	ar = static_cast<T*>(::operator new(INITIAL_CAP * sizeof(T)));
 	cap = INITIAL_CAP;
 	len = 0;
 }
@@ -77,9 +87,18 @@ SmartArray<T>::SmartArray() {
 
 template <typename T>
 SmartArray<T>::SmartArray(unsigned size) {
-	ar = new T[size];
+	// allocate space
+	ar = static_cast<T*>(::operator new(size * sizeof(T)));
 	cap = size;
 	len = 0;
+}
+
+
+template <typename T>
+SmartArray<T>::~SmartArray() {
+	// destroy objects & free space
+	std::destroy(ar, ar + len);
+	::operator delete(ar);
 }
 
 
@@ -108,10 +127,14 @@ template <typename T>
 void SmartArray<T>::resize(unsigned size) {
 	if (size > cap)
 		grow(size);
-	for (unsigned i = len; i < size; i++)
-		ar[i] = T{};
-	for (unsigned i = size; i < len; i++)
-		ar[i].~T();
+
+	if (size > len)
+		// create objects
+		std::uninitialized_value_construct(ar + len, ar + size);
+	else
+		// destroy objects
+		std::destroy(ar + size, ar + len);
+
 	len = size;
 }
 
@@ -120,18 +143,23 @@ template <typename T>
 void SmartArray<T>::resize(unsigned size, T elem) {
 	if (size > cap)
 		grow(size);
-	for (unsigned i = len; i < size; i++)
-		ar[i] = elem;
-	for (unsigned i = size; i < len; i++)
-		ar[i].~T();
+
+	if (size > len)
+		// create objects
+		std::uninitialized_fill(ar + len, ar + size, elem);
+	else
+		// destroy objects
+		std::destroy(ar + size, ar + len);
+
 	len = size;
 }
 
 
 template <typename T>
 void SmartArray<T>::clear() {
-	for (unsigned i = 0; i < len; i++)
-		ar[i].~T();
+	// destroy all objects
+	std::destroy(ar, ar + len);
+
 	len = 0;
 }
 
@@ -141,7 +169,8 @@ void SmartArray<T>::pushBack(T elem) {
 	if (len >= cap)
 		grow(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
 
-	ar[len++] = elem;
+	new (ar + len) T(std::move(elem));
+	len++;
 }
 
 
@@ -153,9 +182,15 @@ void SmartArray<T>::insert(unsigned index, T elem) {
 	if (len >= cap)
 		grow(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
 
-	std::move_backward(ar+index, ar+len, ar+len+1);
-
-	ar[index] = elem;
+	if (index == len) {
+		new (ar + len) T(std::move(elem));
+	} else {
+		// Move-construct the last element into the last uninitialized slot at ar[len]
+		new (ar + len) T(std::move(ar[len - 1]));
+		// Shift remaining elements right using move-assign (all initialized)
+		std::move_backward(ar + index, ar + len - 1, ar + len);
+		ar[index] = std::move(elem);
+	}
 	len++;
 }
 
@@ -164,8 +199,11 @@ template <typename T>
 void SmartArray<T>::erase(unsigned index) {
 	if (index >= len)
 		throw std::out_of_range("index out of range");
-	std::move(ar+index+1, ar+len, ar+index);
-	ar[--len].~T();
+
+	std::move(ar + index + 1, ar + len, ar + index);
+
+	// destroy last object
+	std::destroy_at(ar + --len);
 }
 
 
@@ -175,9 +213,11 @@ void SmartArray<T>::erase(unsigned index, unsigned amount) {
 		return;
 	if (index > len || amount > len - index)
 		throw std::out_of_range("index out of range");
-	std::move(ar+index+amount, ar+len, ar+index);
-	for (unsigned i = len - amount; i < len; i++)
-		ar[i].~T();
+	std::move(ar + index + amount, ar + len, ar + index);
+
+	// destroy objects
+	std::destroy(ar + len - amount, ar + len);
+
 	len -= amount;
 }
 
@@ -186,17 +226,22 @@ template <typename T>
 void SmartArray<T>::popBack() {
 	if (len == 0)
 		throw std::out_of_range("vector is empty");
-	ar[--len].~T();
+
+	// destroy last object
+	std::destroy_at(ar + --len);
 }
 
 
 template <typename T>
 SmartArray<T>::SmartArray(unsigned size, T elem) {
-	ar = new T[size];
+	// allocate space
+	ar = static_cast<T*>(::operator new(size * sizeof(T)));
+
 	cap = size;
 	len = size;
+
 	for (unsigned i = 0; i < size; i++)
-		ar[i] = elem;
+		new (ar + i) T(elem);
 }
 
 
