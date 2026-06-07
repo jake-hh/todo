@@ -557,6 +557,50 @@ TYPED_TEST(SmartArrayTest, StreamOutputMultipleElements) {
     EXPECT_EQ(oss.str(), "[1, 2, 3]");
 }
 
+// ── operator[] / at mutation ──────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, OperatorBracketMutates) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a[0] = val<TypeParam>(99);
+    EXPECT_EQ(a[0], val<TypeParam>(99));
+}
+
+TYPED_TEST(SmartArrayTest, AtMutates) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.at(0) = val<TypeParam>(99);
+    EXPECT_EQ(a.at(0), val<TypeParam>(99));
+}
+
+// ── const correctness ─────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, ConstAccess) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    const SmartArray<TypeParam>& ca = a;
+
+    EXPECT_EQ(ca.size(), 2u);
+    EXPECT_GE(ca.capacity(), 2u);
+    EXPECT_FALSE(ca.isEmpty());
+    EXPECT_EQ(ca[0], val<TypeParam>(1));
+    EXPECT_EQ(ca.at(1), val<TypeParam>(2));
+}
+
+TYPED_TEST(SmartArrayTest, ConstEqualityAndStream) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    const SmartArray<TypeParam>& ca = a;
+    const SmartArray<TypeParam>& cb = a;
+
+    EXPECT_TRUE(ca == cb);
+
+    std::ostringstream oss;
+    oss << ca;
+    EXPECT_EQ(oss.str(), "[1]");
+}
+
 // ── Double-destruction regression ─────────────────────────────────────────────
 // erase/popBack call ar[i].~T() explicitly on the vacated slot. If grow() fires
 // before that slot is refilled, delete[] ar destructs it a second time — UB for

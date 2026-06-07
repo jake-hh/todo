@@ -5,12 +5,11 @@
 #include <memory>
 #include <stdexcept>
 
-#define GROWTH_FACTOR	2u
-
-
 template <typename T>
 class SmartArray {
 private:
+	static constexpr unsigned GROWTH_FACTOR = 2;
+
 	T *ar;
 	unsigned cap;
 	unsigned len;
@@ -36,14 +35,16 @@ public:
 	SmartArray(unsigned size, T elem);
 	~SmartArray();
 
-	unsigned size()		{ return len; }
-	unsigned capacity()	{ return cap; }
-	bool isEmpty()		{ return len == 0; }
+	unsigned size() const		{ return len; }
+	unsigned capacity() const	{ return cap; }
+	bool isEmpty() const		{ return len == 0; }
 
-	T at(unsigned index);
-	T operator[](unsigned index);
+	T& at(unsigned index);
+	const T& at(unsigned index) const;
+	T& operator[](unsigned index);
+	const T& operator[](unsigned index) const;
 
-	bool operator==(const SmartArray<T>& other);
+	bool operator==(const SmartArray<T>& other) const;
 
 	void reserve(unsigned newCap);
 	void resize(unsigned size);
@@ -64,7 +65,7 @@ public:
 };
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, SmartArray<T>& a) {
+std::ostream& operator<<(std::ostream& os, const SmartArray<T>& a) {
 	os << "[";
 	for (unsigned i = 0; i < a.size(); i++) {
 		if (i > 0) os << ", ";
@@ -102,13 +103,25 @@ SmartArray<T>::~SmartArray() {
 
 
 template <typename T>
-T SmartArray<T>::operator[](unsigned index) {
+T& SmartArray<T>::operator[](unsigned index) {
+	return ar[index];
+}
+
+template <typename T>
+const T& SmartArray<T>::operator[](unsigned index) const {
 	return ar[index];
 }
 
 
 template <typename T>
-T SmartArray<T>::at(unsigned index) {
+T& SmartArray<T>::at(unsigned index) {
+	if (index >= len)
+		throw std::out_of_range("index out of range");
+	return ar[index];
+}
+
+template <typename T>
+const T& SmartArray<T>::at(unsigned index) const {
 	if (index >= len)
 		throw std::out_of_range("index out of range");
 	return ar[index];
@@ -245,7 +258,7 @@ SmartArray<T>::SmartArray(unsigned size, T elem) {
 
 
 template <typename T>
-bool SmartArray<T>::operator==(const SmartArray<T>& other) {
+bool SmartArray<T>::operator==(const SmartArray<T>& other) const {
 	if (len != other.len)
 		return false;
 	for (unsigned i = 0; i < len; i++)
