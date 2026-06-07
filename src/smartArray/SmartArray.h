@@ -136,7 +136,7 @@ void SmartArray<T>::insert(unsigned index, T elem) {
 	if (len >= cap)
 		grow(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
 
-	std::move(ar+index, ar+len, ar+index+1);
+	std::move_backward(ar+index, ar+len, ar+len+1);
 
 	ar[index] = elem;
 	len++;
