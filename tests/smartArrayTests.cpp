@@ -554,3 +554,30 @@ TYPED_TEST(SmartArrayTest, StreamOutputMultipleElements) {
     oss << a;
     EXPECT_EQ(oss.str(), "[1, 2, 3]");
 }
+
+// ── Double-destruction regression ─────────────────────────────────────────────
+// erase/popBack call ar[i].~T() explicitly on the vacated slot. If grow() fires
+// before that slot is refilled, delete[] ar destructs it a second time — UB for
+// non-trivial types like std::string.
+// Scenario: fill cap=2 → erase → resize past cap (grow fires immediately,
+// destructed slot 1 is never reassigned before delete[] ar).
+
+TEST(SmartArrayStringTest, PopBackBeforeGrowDoesNotDoubleDestruct) {
+    // Strings must exceed SSO threshold (~15 chars) so their data is heap-allocated
+    // and ASAN can detect the double-free on delete[] ar.
+    // popBack destructs ar[len-1] while it still owns heap data (unlike erase,
+    // which move-assigns out of the slot first). grow() then calls delete[] ar,
+    // which destructs that slot again — freeing already-freed memory.
+    const std::string X(32, 'x');
+    const std::string Y(32, 'y');
+    const std::string Z(32, 'z');
+    SmartArray<std::string> a(2u);
+    a.pushBack(X);
+    a.pushBack(Y);
+    a.popBack();          // destructs ar[1] (live heap string); len=1, cap=2
+    a.resize(5u, Z);      // size=5 > cap=2: grow fires, delete[] ar destructs slot 1 again
+    EXPECT_EQ(a.size(), 5u);
+    EXPECT_EQ(a.at(0), X);
+    EXPECT_EQ(a.at(1), Z);
+    EXPECT_EQ(a.at(4), Z);
+}
