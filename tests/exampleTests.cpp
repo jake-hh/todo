@@ -205,6 +205,11 @@ TYPED_TEST(SmartArrayTest, PopBackDecreasesSize) {
     EXPECT_EQ(a.capacity(), capBefore);
 }
 
+TYPED_TEST(SmartArrayTest, PopBackOnEmptyThrows) {
+    SmartArray<TypeParam> a;
+    EXPECT_THROW(a.popBack(), std::out_of_range);
+}
+
 TYPED_TEST(SmartArrayTest, AtOutOfRangeThrows) {
     SmartArray<TypeParam> a;
     a.pushBack(val<TypeParam>(1));
@@ -223,4 +228,59 @@ TYPED_TEST(SmartArrayTest, PushBackGrowsCapacity) {
     EXPECT_EQ(a.at(0), val<TypeParam>(1));
     EXPECT_EQ(a.at(1), val<TypeParam>(2));
     EXPECT_EQ(a.at(2), val<TypeParam>(3));
+}
+
+TYPED_TEST(SmartArrayTest, InsertGrowsCapacity) {
+    SmartArray<TypeParam> a(2u);
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.insert(1u, val<TypeParam>(9)); // triggers grow
+    EXPECT_EQ(a.size(), 3u);
+    EXPECT_GT(a.capacity(), 2u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(1), val<TypeParam>(9));
+    EXPECT_EQ(a.at(2), val<TypeParam>(2));
+}
+
+// ── Extra edge cases ──────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, EraseLastElement) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.erase(1u);
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+}
+
+TYPED_TEST(SmartArrayTest, ClearThenReuse) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.clear();
+    a.pushBack(val<TypeParam>(3));
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(3));
+}
+
+TYPED_TEST(SmartArrayTest, ResizeSameSize) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    unsigned capBefore = a.capacity();
+    a.resize(2u);
+    EXPECT_EQ(a.size(), 2u);
+    EXPECT_EQ(a.capacity(), capBefore);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(1), val<TypeParam>(2));
+}
+
+TYPED_TEST(SmartArrayTest, EraseZeroCount) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.erase(0u, 0u);
+    EXPECT_EQ(a.size(), 2u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(1), val<TypeParam>(2));
 }
