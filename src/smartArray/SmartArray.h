@@ -5,7 +5,6 @@
 #include <memory>
 #include <stdexcept>
 
-#define INITIAL_CAP		16u
 #define GROWTH_FACTOR	2u
 
 
@@ -78,9 +77,9 @@ std::ostream& operator<<(std::ostream& os, SmartArray<T>& a) {
 
 template <typename T>
 SmartArray<T>::SmartArray() {
-	// allocate space
-	ar = static_cast<T*>(::operator new(INITIAL_CAP * sizeof(T)));
-	cap = INITIAL_CAP;
+	// no allocation until first push
+	ar = static_cast<T*>(::operator new(0));
+	cap = 0;
 	len = 0;
 }
 
@@ -167,7 +166,7 @@ void SmartArray<T>::clear() {
 template <typename T>
 void SmartArray<T>::pushBack(T elem) {
 	if (len >= cap)
-		grow(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
+		grow(cap == 0 ? 1 : cap * GROWTH_FACTOR);
 
 	new (ar + len) T(std::move(elem));
 	len++;
@@ -180,7 +179,7 @@ void SmartArray<T>::insert(unsigned index, T elem) {
 		throw std::out_of_range("index out of range");
 
 	if (len >= cap)
-		grow(std::max(INITIAL_CAP, cap * GROWTH_FACTOR));
+		grow(cap == 0 ? 1 : cap * GROWTH_FACTOR);
 
 	if (index == len) {
 		new (ar + len) T(std::move(elem));

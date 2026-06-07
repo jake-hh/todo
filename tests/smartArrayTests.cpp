@@ -18,7 +18,7 @@ TYPED_TEST_SUITE(SmartArrayTest, TestTypes);
 TYPED_TEST(SmartArrayTest, DefaultConstructor) {
     SmartArray<TypeParam> a;
     EXPECT_EQ(a.size(), 0u);
-    EXPECT_EQ(a.capacity(), 16u);
+    EXPECT_EQ(a.capacity(), 0u);
     EXPECT_TRUE(a.isEmpty());
 }
 
@@ -143,9 +143,9 @@ TYPED_TEST(SmartArrayTest, ReserveIncreasesCapacity) {
 
 TYPED_TEST(SmartArrayTest, ReserveNoOpWhenSmaller) {
     SmartArray<TypeParam> a;
-    unsigned capBefore = a.capacity();
-    a.reserve(capBefore - 1);
-    EXPECT_EQ(a.capacity(), capBefore);
+    a.reserve(8);
+    a.reserve(4);
+    EXPECT_EQ(a.capacity(), 8u);
     EXPECT_EQ(a.size(), 0u);
 }
 
@@ -441,12 +441,14 @@ TYPED_TEST(SmartArrayTest, ShrinkToFitReducesCapacity) {
     SmartArray<TypeParam> a;
     a.pushBack(val<TypeParam>(1));
     a.pushBack(val<TypeParam>(2));
-    EXPECT_GT(a.capacity(), 2u);
+    a.pushBack(val<TypeParam>(3));
+    EXPECT_GT(a.capacity(), 3u);
     a.shrinkToFit();
-    EXPECT_EQ(a.capacity(), 2u);
-    EXPECT_EQ(a.size(), 2u);
+    EXPECT_EQ(a.capacity(), 3u);
+    EXPECT_EQ(a.size(), 3u);
     EXPECT_EQ(a.at(0), val<TypeParam>(1));
     EXPECT_EQ(a.at(1), val<TypeParam>(2));
+    EXPECT_EQ(a.at(2), val<TypeParam>(3));
 }
 
 TYPED_TEST(SmartArrayTest, ShrinkToFitWhenAlreadyFit) {
