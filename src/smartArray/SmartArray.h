@@ -252,8 +252,7 @@ SmartArray<T>::SmartArray(unsigned size, const T& elem) {
 	cap = size;
 	len = size;
 
-	for (unsigned i = 0; i < size; i++)
-		new (ar + i) T(elem);
+	std::uninitialized_fill(ar, ar + size, elem);
 }
 
 
