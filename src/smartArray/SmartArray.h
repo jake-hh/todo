@@ -39,6 +39,11 @@ public:
 	unsigned capacity() const	{ return cap; }
 	bool isEmpty() const		{ return len == 0; }
 
+	T* begin()             { return ar; }
+	T* end()               { return ar + len; }
+	const T* begin() const { return ar; }
+	const T* end()   const { return ar + len; }
+
 	T& at(unsigned index);
 	const T& at(unsigned index) const;
 	T& operator[](unsigned index);

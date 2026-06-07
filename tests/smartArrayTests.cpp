@@ -557,6 +557,74 @@ TYPED_TEST(SmartArrayTest, StreamOutputMultipleElements) {
     EXPECT_EQ(oss.str(), "[1, 2, 3]");
 }
 
+// ── iterators ─────────────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, RangeForReadsElements) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    std::vector<TypeParam> result;
+    for (auto& x : a)
+        result.push_back(x);
+    EXPECT_EQ(result.size(), 3u);
+    EXPECT_EQ(result[0], val<TypeParam>(1));
+    EXPECT_EQ(result[1], val<TypeParam>(2));
+    EXPECT_EQ(result[2], val<TypeParam>(3));
+}
+
+TYPED_TEST(SmartArrayTest, RangeForMutatesElements) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    for (auto& x : a)
+        x = val<TypeParam>(9);
+    EXPECT_EQ(a[0], val<TypeParam>(9));
+    EXPECT_EQ(a[1], val<TypeParam>(9));
+}
+
+TYPED_TEST(SmartArrayTest, ConstRangeFor) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    const SmartArray<TypeParam>& ca = a;
+    std::vector<TypeParam> result;
+    for (const auto& x : ca)
+        result.push_back(x);
+    EXPECT_EQ(result[0], val<TypeParam>(1));
+    EXPECT_EQ(result[1], val<TypeParam>(2));
+}
+
+TYPED_TEST(SmartArrayTest, RangeForEmptyIsNoop) {
+    SmartArray<TypeParam> a;
+    int count = 0;
+    for (auto& _ : a)
+        count++;
+    EXPECT_EQ(count, 0);
+}
+
+TYPED_TEST(SmartArrayTest, StdFindLocatesElement) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    auto it = std::find(a.begin(), a.end(), val<TypeParam>(2));
+    ASSERT_NE(it, a.end());
+    EXPECT_EQ(*it, val<TypeParam>(2));
+}
+
+TYPED_TEST(SmartArrayTest, StdFindReturnsEndWhenMissing) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    auto it = std::find(a.begin(), a.end(), val<TypeParam>(99));
+    EXPECT_EQ(it, a.end());
+}
+
+TYPED_TEST(SmartArrayTest, BeginEqualsEndWhenEmpty) {
+    SmartArray<TypeParam> a;
+    EXPECT_EQ(a.begin(), a.end());
+}
+
 // ── operator[] / at mutation ──────────────────────────────────────────────────
 
 TYPED_TEST(SmartArrayTest, OperatorBracketMutates) {
