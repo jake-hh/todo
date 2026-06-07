@@ -26,6 +26,7 @@ private:
 public:
 	SmartArray();
 	SmartArray(unsigned size);
+	SmartArray(unsigned size, T elem);
 
 	unsigned size()		{ return len; }
 	unsigned capacity()	{ return cap; }
@@ -34,20 +35,36 @@ public:
 	T at(unsigned index);
 	T operator[](unsigned index);
 
+	bool operator==(const SmartArray<T>& other);
+
 	void reserve(unsigned newCap);
 	void resize(unsigned size);
 	void resize(unsigned size, T elem);
+	void shrinkToFit();
 
 	void clear();
 
 	void pushBack(T elem);
+	void pushFront(T elem);
 	void insert(unsigned index, T elem);
 
 	void erase(unsigned index);
 	void erase(unsigned index, unsigned amount);
 	void popBack();
+	void popFront();
 
 };
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, SmartArray<T>& a) {
+	os << "[";
+	for (unsigned i = 0; i < a.size(); i++) {
+		if (i > 0) os << ", ";
+		os << a[i];
+	}
+	os << "]";
+	return os;
+}
 
 
 template <typename T>
@@ -170,6 +187,46 @@ void SmartArray<T>::popBack() {
 	if (len == 0)
 		throw std::out_of_range("vector is empty");
 	ar[--len].~T();
+}
+
+
+template <typename T>
+SmartArray<T>::SmartArray(unsigned size, T elem) {
+	ar = new T[size];
+	cap = size;
+	len = size;
+	for (unsigned i = 0; i < size; i++)
+		ar[i] = elem;
+}
+
+
+template <typename T>
+bool SmartArray<T>::operator==(const SmartArray<T>& other) {
+	if (len != other.len)
+		return false;
+	for (unsigned i = 0; i < len; i++)
+		if (ar[i] != other.ar[i])
+			return false;
+	return true;
+}
+
+
+template <typename T>
+void SmartArray<T>::shrinkToFit() {
+	if (cap > len)
+		grow(len);
+}
+
+
+template <typename T>
+void SmartArray<T>::pushFront(T elem) {
+	insert(0, elem);
+}
+
+
+template <typename T>
+void SmartArray<T>::popFront() {
+	erase(0);
 }
 
 #endif

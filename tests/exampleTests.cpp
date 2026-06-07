@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <sstream>
 #include "../src/smartArray/SmartArray.h"
 
 // Helper to produce typed test values from an int seed
@@ -364,4 +365,192 @@ TYPED_TEST(SmartArrayTest, EraseRangeOnEmptyThrows) {
 TYPED_TEST(SmartArrayTest, InsertOutOfRangeOnEmptyThrows) {
     SmartArray<TypeParam> a;
     EXPECT_THROW(a.insert(1u, val<TypeParam>(1)), std::out_of_range);
+}
+
+// ── Fill constructor (size, elem) ─────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, FillConstructorSetsAllElements) {
+    SmartArray<TypeParam> a(3u, val<TypeParam>(7));
+    EXPECT_EQ(a.size(), 3u);
+    EXPECT_EQ(a.capacity(), 3u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(7));
+    EXPECT_EQ(a.at(1), val<TypeParam>(7));
+    EXPECT_EQ(a.at(2), val<TypeParam>(7));
+}
+
+TYPED_TEST(SmartArrayTest, FillConstructorZeroSize) {
+    SmartArray<TypeParam> a(0u, val<TypeParam>(7));
+    EXPECT_EQ(a.size(), 0u);
+    EXPECT_TRUE(a.isEmpty());
+}
+
+TYPED_TEST(SmartArrayTest, FillConstructorCanPushBack) {
+    SmartArray<TypeParam> a(2u, val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    EXPECT_EQ(a.size(), 3u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(2), val<TypeParam>(2));
+}
+
+// ── operator== ───────────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, EqualityBothEmpty) {
+    SmartArray<TypeParam> a, b;
+    EXPECT_TRUE(a == b);
+}
+
+TYPED_TEST(SmartArrayTest, EqualitySameElements) {
+    SmartArray<TypeParam> a, b;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    b.pushBack(val<TypeParam>(1));
+    b.pushBack(val<TypeParam>(2));
+    EXPECT_TRUE(a == b);
+}
+
+TYPED_TEST(SmartArrayTest, EqualityDifferentSize) {
+    SmartArray<TypeParam> a, b;
+    a.pushBack(val<TypeParam>(1));
+    EXPECT_FALSE(a == b);
+}
+
+TYPED_TEST(SmartArrayTest, EqualityDifferentElements) {
+    SmartArray<TypeParam> a, b;
+    a.pushBack(val<TypeParam>(1));
+    b.pushBack(val<TypeParam>(2));
+    EXPECT_FALSE(a == b);
+}
+
+TYPED_TEST(SmartArrayTest, EqualityFillConstructed) {
+    SmartArray<TypeParam> a(3u, val<TypeParam>(5));
+    SmartArray<TypeParam> b(3u, val<TypeParam>(5));
+    EXPECT_TRUE(a == b);
+}
+
+TYPED_TEST(SmartArrayTest, EqualityDifferentCapacitySameContent) {
+    SmartArray<TypeParam> a;       // cap=16
+    SmartArray<TypeParam> b(32u);  // cap=32
+    a.pushBack(val<TypeParam>(1));
+    b.pushBack(val<TypeParam>(1));
+    EXPECT_TRUE(a == b);
+}
+
+// ── shrinkToFit ───────────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, ShrinkToFitReducesCapacity) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    EXPECT_GT(a.capacity(), 2u);
+    a.shrinkToFit();
+    EXPECT_EQ(a.capacity(), 2u);
+    EXPECT_EQ(a.size(), 2u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(1), val<TypeParam>(2));
+}
+
+TYPED_TEST(SmartArrayTest, ShrinkToFitWhenAlreadyFit) {
+    SmartArray<TypeParam> a(2u);
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.shrinkToFit();
+    EXPECT_EQ(a.capacity(), 2u);
+    EXPECT_EQ(a.size(), 2u);
+}
+
+TYPED_TEST(SmartArrayTest, ShrinkToFitEmptyThenPushBack) {
+    SmartArray<TypeParam> a;
+    a.shrinkToFit();
+    EXPECT_EQ(a.capacity(), 0u);
+    a.pushBack(val<TypeParam>(1));
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_GE(a.capacity(), 1u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+}
+
+// ── pushFront ─────────────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, PushFrontInsertsAtBeginning) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    a.pushFront(val<TypeParam>(1));
+    EXPECT_EQ(a.size(), 3u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+    EXPECT_EQ(a.at(1), val<TypeParam>(2));
+    EXPECT_EQ(a.at(2), val<TypeParam>(3));
+}
+
+TYPED_TEST(SmartArrayTest, PushFrontOnEmpty) {
+    SmartArray<TypeParam> a;
+    a.pushFront(val<TypeParam>(1));
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+}
+
+TYPED_TEST(SmartArrayTest, PushFrontGrowsCapacity) {
+    SmartArray<TypeParam> a(2u);
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushFront(val<TypeParam>(0));
+    EXPECT_EQ(a.size(), 3u);
+    EXPECT_GT(a.capacity(), 2u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(0));
+    EXPECT_EQ(a.at(1), val<TypeParam>(1));
+    EXPECT_EQ(a.at(2), val<TypeParam>(2));
+}
+
+// ── popFront ──────────────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, PopFrontRemovesFirstElement) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    a.popFront();
+    EXPECT_EQ(a.size(), 2u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(2));
+    EXPECT_EQ(a.at(1), val<TypeParam>(3));
+}
+
+TYPED_TEST(SmartArrayTest, PopFrontOnEmptyThrows) {
+    SmartArray<TypeParam> a;
+    EXPECT_THROW(a.popFront(), std::out_of_range);
+}
+
+TYPED_TEST(SmartArrayTest, PopFrontUntilEmpty) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.popFront();
+    a.popFront();
+    EXPECT_TRUE(a.isEmpty());
+    EXPECT_THROW(a.popFront(), std::out_of_range);
+}
+
+// ── operator<< ───────────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, StreamOutputEmpty) {
+    SmartArray<TypeParam> a;
+    std::ostringstream oss;
+    oss << a;
+    EXPECT_EQ(oss.str(), "[]");
+}
+
+TYPED_TEST(SmartArrayTest, StreamOutputSingleElement) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    std::ostringstream oss;
+    oss << a;
+    EXPECT_EQ(oss.str(), "[1]");
+}
+
+TYPED_TEST(SmartArrayTest, StreamOutputMultipleElements) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    std::ostringstream oss;
+    oss << a;
+    EXPECT_EQ(oss.str(), "[1, 2, 3]");
 }
