@@ -211,10 +211,27 @@ TYPED_TEST(SmartArrayTest, PopBackOnEmptyThrows) {
     EXPECT_THROW(a.popBack(), std::out_of_range);
 }
 
+TYPED_TEST(SmartArrayTest, PopBackUntilEmpty) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.popBack();
+    a.popBack();
+    EXPECT_TRUE(a.isEmpty());
+    EXPECT_THROW(a.popBack(), std::out_of_range);
+}
+
 TYPED_TEST(SmartArrayTest, AtOutOfRangeThrows) {
     SmartArray<TypeParam> a;
     a.pushBack(val<TypeParam>(1));
     EXPECT_THROW(a.at(5u), std::out_of_range);
+}
+
+TYPED_TEST(SmartArrayTest, AtOutOfRangeThrowsOnConst) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    const SmartArray<TypeParam>& ca = a;
+    EXPECT_THROW(ca.at(5u), std::out_of_range);
 }
 
 // ── Step 3: pushBack past capacity ───────────────────────────────────────────
@@ -362,6 +379,16 @@ TYPED_TEST(SmartArrayTest, EraseRangeOnEmptyThrows) {
     EXPECT_THROW(a.erase(0u, 1u), std::out_of_range);
 }
 
+TYPED_TEST(SmartArrayTest, EraseRangeTailSlice) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+    a.pushBack(val<TypeParam>(3));
+    a.erase(1u, 2u);
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+}
+
 TYPED_TEST(SmartArrayTest, InsertOutOfRangeOnEmptyThrows) {
     SmartArray<TypeParam> a;
     EXPECT_THROW(a.insert(1u, val<TypeParam>(1)), std::out_of_range);
@@ -468,6 +495,19 @@ TYPED_TEST(SmartArrayTest, ShrinkToFitEmptyThenPushBack) {
     EXPECT_EQ(a.size(), 1u);
     EXPECT_GE(a.capacity(), 1u);
     EXPECT_EQ(a.at(0), val<TypeParam>(1));
+}
+
+TYPED_TEST(SmartArrayTest, ShrinkToFitAfterReserveAndClear) {
+    SmartArray<TypeParam> a;
+    a.reserve(8);
+    EXPECT_GE(a.capacity(), 8u);
+    a.pushBack(val<TypeParam>(1));
+    a.clear();
+    EXPECT_EQ(a.size(), 0u);
+    EXPECT_GE(a.capacity(), 8u);
+    a.shrinkToFit();
+    EXPECT_EQ(a.capacity(), 0u);
+    EXPECT_EQ(a.size(), 0u);
 }
 
 // ── pushFront ─────────────────────────────────────────────────────────────────
