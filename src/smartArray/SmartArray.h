@@ -22,6 +22,11 @@ public:
 	SmartArray(unsigned size, const T& elem);
 	~SmartArray();
 
+	SmartArray(const SmartArray& other);
+	SmartArray(SmartArray&& other) noexcept;
+	SmartArray& operator=(const SmartArray& other);
+	SmartArray& operator=(SmartArray&& other) noexcept;
+
 	unsigned size() const      { return len; }
 	unsigned capacity() const  { return cap; }
 	bool isEmpty() const       { return len == 0; }
@@ -92,7 +97,6 @@ SmartArray<T>::SmartArray() {
 	len = 0;
 }
 
-
 template <typename T>
 SmartArray<T>::SmartArray(unsigned size) {
 	// allocate space
@@ -100,7 +104,6 @@ SmartArray<T>::SmartArray(unsigned size) {
 	cap = size;
 	len = 0;
 }
-
 
 template <typename T>
 SmartArray<T>::SmartArray(unsigned size, const T& elem) {
@@ -111,6 +114,50 @@ SmartArray<T>::SmartArray(unsigned size, const T& elem) {
 	len = size;
 
 	std::uninitialized_fill(ar, ar + size, elem);
+}
+
+
+template <typename T>
+SmartArray<T>::SmartArray(const SmartArray& other) {
+	ar = static_cast<T*>(::operator new(other.cap * sizeof(T)));
+	cap = other.cap;
+	len = other.len;
+	std::uninitialized_copy(other.ar, other.ar + other.len, ar);
+}
+
+template <typename T>
+SmartArray<T>::SmartArray(SmartArray&& other) noexcept
+	: ar(other.ar), cap(other.cap), len(other.len) {
+	other.ar  = nullptr;
+	other.cap = 0;
+	other.len = 0;
+}
+
+
+template <typename T>
+SmartArray<T>& SmartArray<T>::operator=(const SmartArray& other) {
+	if (this != &other) {
+		SmartArray tmp(other);
+		std::swap(ar, tmp.ar);
+		std::swap(cap, tmp.cap);
+		std::swap(len, tmp.len);
+	}
+	return *this;
+}
+
+template <typename T>
+SmartArray<T>& SmartArray<T>::operator=(SmartArray&& other) noexcept {
+	if (this != &other) {
+		std::destroy(ar, ar + len);
+		::operator delete(ar);
+		ar  = other.ar;
+		cap = other.cap;
+		len = other.len;
+		other.ar  = nullptr;
+		other.cap = 0;
+		other.len = 0;
+	}
+	return *this;
 }
 
 
