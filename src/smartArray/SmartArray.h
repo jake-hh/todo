@@ -17,45 +17,148 @@ private:
 	void _changeCap(unsigned newCap);
 
 public:
+	/**
+	 * @brief Default constructor. Creates an empty array with no allocation.
+	 */
 	SmartArray();
+	/**
+	 * @brief Reserve constructor. Allocates space for @p size elements but sets length to 0.
+	 */
 	SmartArray(unsigned size);
+	/**
+	 * @brief Fill constructor. Creates an array of @p size elements all set to @p elem.
+	 */
 	SmartArray(unsigned size, const T& elem);
+	/**
+	 * @brief Destructor. Destroys all elements and frees the allocation.
+	 */
 	~SmartArray();
 
+	/**
+	 * @brief Copy constructor. Deep-copies elements from @p other into a new allocation.
+	 */
 	SmartArray(const SmartArray& other);
+	/**
+	 * @brief Move constructor. Transfers ownership from @p other, leaving it empty.
+	 */
 	SmartArray(SmartArray&& other) noexcept;
+	/**
+	 * @brief Copy assignment. Replaces contents with a deep copy of @p other (copy-and-swap).
+	 */
 	SmartArray& operator=(const SmartArray& other);
+	/**
+	 * @brief Move assignment. Releases current allocation and takes ownership from @p other.
+	 */
 	SmartArray& operator=(SmartArray&& other) noexcept;
 
+	/**
+	 * @brief Returns the number of elements stored.
+	 */
 	unsigned size() const      { return len; }
+	/**
+	 * @brief Returns the number of elements for which memory is reserved.
+	 */
 	unsigned capacity() const  { return cap; }
+	/**
+	 * @brief Returns true if the array contains no elements.
+	 */
 	bool isEmpty() const       { return len == 0; }
 
+	/**
+	 * @brief Returns a pointer to the first element.
+	 */
 	T* begin()                 { return ar; }
+	/**
+	 * @brief Returns a pointer one past the last element.
+	 */
 	T* end()                   { return ar + len; }
+	/**
+	 * @brief Const overload of begin().
+	 */
 	const T* begin() const     { return ar; }
+	/**
+	 * @brief Const overload of end().
+	 */
 	const T* end()   const     { return ar + len; }
 
+	/**
+	 * @brief Returns a reference to the element at @p index.
+	 * @throws std::out_of_range if index >= size.
+	 */
 	T& at(unsigned index);
+	/**
+	 * @brief Const overload of at().
+	 * @throws std::out_of_range if index >= size.
+	 */
 	const T& at(unsigned index) const;
+	/**
+	 * @brief Returns a reference to the element at @p index. No bounds checking.
+	 */
 	T& operator[](unsigned index);
+	/**
+	 * @brief Const overload of operator[].
+	 */
 	const T& operator[](unsigned index) const;
 
+	/**
+	 * @brief Returns true if both arrays have the same size and equal elements.
+	 */
 	bool operator==(const SmartArray<T>& other) const;
 
+	/**
+	 * @brief Ensures capacity for at least @p newCap elements without changing size.
+	 */
 	void reserve(unsigned newCap);
+	/**
+	 * @brief Resizes the array to @p size, default-constructing new elements or destroying excess ones.
+	 */
 	void resize(unsigned size);
+	/**
+	 * @brief Resizes the array to @p size, filling new elements with @p elem or destroying excess ones.
+	 */
 	void resize(unsigned size, const T& elem);
+	/**
+	 * @brief Reduces capacity to match the current size.
+	 */
 	void shrinkToFit();
 
+	/**
+	 * @brief Appends @p elem to the end, growing capacity if needed.
+	 */
 	void pushBack(T elem);
+	/**
+	 * @brief Inserts @p elem at the front, shifting all elements right.
+	 */
 	void pushFront(T elem);
+	/**
+	 * @brief Inserts @p elem at @p index, shifting subsequent elements right.
+	 * @throws std::out_of_range if index > size.
+	 */
 	void insert(unsigned index, T elem);
 
+	/**
+	 * @brief Removes all elements. Capacity is unchanged.
+	 */
 	void clear();
+	/**
+	 * @brief Removes the element at @p index, shifting subsequent elements left.
+	 * @throws std::out_of_range if index >= size.
+	 */
 	void erase(unsigned index);
+	/**
+	 * @brief Removes @p amount elements starting at @p index.
+	 * @throws std::out_of_range if index + amount > size.
+	 */
 	void erase(unsigned index, unsigned amount);
+	/**
+	 * @brief Removes the last element.
+	 * @throws std::out_of_range if the array is empty.
+	 */
 	void popBack();
+	/**
+	 * @brief Removes the first element.
+	 * @throws std::out_of_range if the array is empty.
+	 */
 	void popFront();
 };
 
