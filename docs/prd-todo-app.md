@@ -51,7 +51,7 @@ A TUI application written in C++ using ftxui that manages a list of tasks stored
 **Data layer** (`src/app/data/`)
 
 - `Task` — plain struct: `unsigned id`, `std::string title`, `std::string description`, `int priority` (0–3), `int status` (0–3 mapped to open/in-progress/done/wontfix), `int64_t createdAt`, `int64_t dueDate` (-1 = none), `SmartArray<unsigned> deps`. All fields documented with Doxygen.
-- `TaskStore` — owns `std::unordered_map<unsigned, Task>` as primary store plus a `SmartArray<unsigned> orderedIds` for deterministic display order. Exposes create, update, delete, and query operations. Manages `nextId` (derived as `max(id)+1` on load). Contains cycle-detection DFS, search/filter returning `SmartArray<unsigned>`, and all aggregate functions.
+- `TaskStore` — owns `std::map<unsigned, Task>` as primary store (O(log n) access, deterministic iteration in ID order). Exposes create, update, delete, and query operations. Manages `nextId` (derived as `max(id)+1` on load). Contains cycle-detection DFS, search/filter returning `SmartArray<unsigned>`, and all aggregate functions.
 - `FileIO` — stateless functions for binary serialization/deserialization of the full task list. Dates stored as `int64_t`, strings as `uint32_t` length prefix + bytes, dep arrays as `uint32_t` count + array of `uint32_t`.
 
 **TUI layer** (`src/app/tui/`)
@@ -66,7 +66,7 @@ A TUI application written in C++ using ftxui that manages a list of tasks stored
 
 ### Key Architecture Decisions
 
-- Primary task store is `std::unordered_map<unsigned, Task>` for O(1) ID-based access. `SmartArray` is used for `deps` inside each `Task` and for `orderedIds` in `TaskStore` and search result sets.
+- Primary task store is `std::map<unsigned, Task>` for O(log n) ID-based access and deterministic iteration in ID order. `SmartArray` is used for `deps` inside each `Task` and for search result sets.
 - IDs are auto-incremented unsigned integers. `nextId` is not persisted; it is re-derived from `max(id)+1` after loading.
 - Dates are `int64_t` seconds since Unix epoch in memory and in the file. User-facing format is DD/MM/YY using `<ctime>` (`localtime`, `strftime`, `mktime`). No external date library.
 - Due-in-2-days check: `difftime(dueDate, time(nullptr)) <= 2*24*3600`.
@@ -78,7 +78,7 @@ A TUI application written in C++ using ftxui that manages a list of tasks stored
 
 ### Tree View Modes (MVP first, rest later)
 
-1. **MVP**: all tasks tree, duplicates shown as-is, default display order (map iteration, i.e. arbitrary).
+1. **MVP**: all tasks tree, duplicates shown as-is, sorted by ID ascending (std::map iteration order).
 2. All tasks tree, duplicate nodes grayed.
 3. Open + in-progress tasks only tree.
 4. Non-blocked tasks only, sorted by priority descending then due date ascending.
@@ -111,5 +111,5 @@ Good tests verify observable behavior through public interfaces only — no insp
 ## Further Notes
 
 - The project must compile cleanly with the Visual Studio compiler (MSVC). Avoid GCC/Clang extensions. Use `int64_t` not `time_t` in binary file format to avoid platform size differences.
-- The academic requirement is "at least one instance of SmartArray in the app" — the design uses it in three places (`deps`, `orderedIds`, search results), which is robust against any grader scrutiny.
+- The academic requirement is "at least one instance of SmartArray in the app" — the design uses it in two places (`deps` in each Task, search result sets).
 - The `SmartArray` implementation may be replaced with `std::vector` after the assignment is submitted; the data layer is intentionally isolated so this swap touches only `Task.h` and `TaskStore`.
