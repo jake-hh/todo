@@ -13,9 +13,12 @@ include(CTest)
 enable_testing()
 
 add_executable(smartArrayTests smartArrayTests.cpp)
-
 target_link_libraries(smartArrayTests GTest::gtest_main SmartArray)
 
+add_executable(taskStoreTests taskStoreTests.cpp ../src/app/data/TaskStore.cpp)
+target_include_directories(taskStoreTests PRIVATE ../src/smartArray)
+target_link_libraries(taskStoreTests GTest::gtest_main SmartArray)
 
 include(GoogleTest)
 gtest_discover_tests(smartArrayTests)
+gtest_discover_tests(taskStoreTests)
