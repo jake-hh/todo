@@ -8,7 +8,7 @@ include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
         GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
-        GIT_TAG main
+        GIT_TAG v6.1.9
 )
 FetchContent_MakeAvailable(ftxui)
 
@@ -16,7 +16,9 @@ add_library(SmartArray src/smartArray/SmartArray.cpp src/smartArray/SmartArray.h
 target_include_directories(SmartArray PUBLIC src/smartArray)
 
 add_executable(SmartArrayApp src/app/main.cpp)
+target_link_libraries(SmartArrayApp ftxui::component SmartArray)
 
-target_link_libraries(SmartArrayApp ftxui::screen ftxui::component SmartArray)
+add_executable(SmartArrayDemo src/app/smartArrayDemo.cpp)
+target_link_libraries(SmartArrayDemo SmartArray)
 
 add_subdirectory(tests)
