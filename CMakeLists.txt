@@ -17,6 +17,7 @@ target_include_directories(SmartArray PUBLIC src/smartArray)
 
 add_executable(SmartArrayApp
     src/app/main.cpp
+    src/app/data/Task.cpp
     src/app/data/TaskStore.cpp
     src/app/tui/App.cpp
     src/app/tui/TaskListPane.cpp

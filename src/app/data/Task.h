@@ -16,4 +16,16 @@ struct Task {
     int64_t createdAt;    ///< Unix epoch seconds
     int64_t dueDate;      ///< Unix epoch seconds, or -1 if none
     SmartArray<unsigned> deps; ///< Depencies / subtasks (IDs of tasks this task is blocked by)
+
+    /** @brief Returns a human-readable label for the status value. */
+    std::string statusLabel() const;
+
+    /** @brief Returns a human-readable label for the priority value. */
+    std::string priorityLabel() const;
+
+    /** @brief Returns the due date formatted as DD/MM/YY, or "none" if unset. */
+    std::string dueDateLabel() const;
+
+    /** @brief Returns the creation date formatted as DD/MM/YY. */
+    std::string createdAtLabel() const;
 };

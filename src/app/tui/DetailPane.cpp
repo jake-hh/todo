@@ -1,48 +1,8 @@
 #include "DetailPane.h"
 
 #include <algorithm>
-#include <ctime>
 #include <string>
 #include <ftxui/dom/elements.hpp>
-
-
-namespace {
-
-// These helpers are file-local so the pane owns the display mapping and
-// callers never need to know the numeric encoding.
-
-std::string statusStr(int s) {
-    switch (s) {
-        case 0:  return "open";
-        case 1:  return "in-progress";
-        case 2:  return "done";
-        case 3:  return "wontfix";
-        default: return "?";
-    }
-}
-
-
-std::string priorityStr(int p) {
-    switch (p) {
-        case 0:  return "wishlist";
-        case 1:  return "low";
-        case 2:  return "medium";
-        case 3:  return "high";
-        default: return "?";
-    }
-}
-
-
-// Formats a Unix epoch timestamp as DD/MM/YY. Returns "none" for -1 (unset).
-std::string dateStr(int64_t t) {
-    if (t == -1) return "none";
-    time_t tt = static_cast<time_t>(t);
-    char buf[16];
-    std::strftime(buf, sizeof(buf), "%d/%m/%y", std::localtime(&tt));
-    return buf;
-}
-
-} // namespace
 
 
 ftxui::Component MakeDetailPane(const TaskStore& store,
@@ -78,10 +38,10 @@ ftxui::Component MakeDetailPane(const TaskStore& store,
         return vbox({
             field(" ID",          std::to_string(t.id)),
             field(" Title",       t.title),
-            field(" Status",      statusStr(t.status)),
-            field(" Priority",    priorityStr(t.priority)),
-            field(" Created",     dateStr(t.createdAt)),
-            field(" Due",         dateStr(t.dueDate)),
+            field(" Status",      t.statusLabel()),
+            field(" Priority",    t.priorityLabel()),
+            field(" Created",     t.createdAtLabel()),
+            field(" Due",         t.dueDateLabel()),
             field(" Description", t.description),
             field(" Deps",        deps),
         });

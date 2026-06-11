@@ -7,22 +7,6 @@
 #include "DetailPane.h"
 
 
-namespace {
-
-// Kept file-local so neither pane needs to know the status encoding.
-std::string statusStr(int s) {
-    switch (s) {
-        case 0:  return "open";
-        case 1:  return "in-progress";
-        case 2:  return "done";
-        case 3:  return "wontfix";
-        default: return "?";
-    }
-}
-
-} // namespace
-
-
 App::App() {
     // Hardcoded seed tasks — placeholder until FileIO is wired up.
     _store.create("Fix login bug",
@@ -49,7 +33,7 @@ App::App() {
     // std::map iterates in ID order so the resulting vectors are sorted by ID.
     for (auto& [id, task] : _store.tasks()) {
         _ids.push_back(id);
-        _entries.push_back("[" + statusStr(task.status) + "] " + task.title);
+        _entries.push_back("[" + task.statusLabel() + "] " + task.title);
     }
 }
 
