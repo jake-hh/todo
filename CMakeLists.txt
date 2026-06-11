@@ -15,7 +15,13 @@ FetchContent_MakeAvailable(ftxui)
 add_library(SmartArray src/smartArray/SmartArray.cpp src/smartArray/SmartArray.h)
 target_include_directories(SmartArray PUBLIC src/smartArray)
 
-add_executable(SmartArrayApp src/app/main.cpp src/app/data/TaskStore.cpp)
+add_executable(SmartArrayApp
+    src/app/main.cpp
+    src/app/data/TaskStore.cpp
+    src/app/tui/App.cpp
+    src/app/tui/TaskListPane.cpp
+    src/app/tui/DetailPane.cpp
+)
 target_link_libraries(SmartArrayApp ftxui::component SmartArray)
 
 add_executable(SmartArrayDemo src/app/smartArrayDemo.cpp)
