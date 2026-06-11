@@ -735,3 +735,79 @@ TEST(SmartArrayStringTest, PopBackBeforeGrowDoesNotDoubleDestruct) {
     EXPECT_EQ(a.at(1), Z);
     EXPECT_EQ(a.at(4), Z);
 }
+
+// ── Rule of Five ─────────────────────────────────────────────────────────────
+
+TYPED_TEST(SmartArrayTest, CopyConstructorDeepCopies) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(1));
+    a.pushBack(val<TypeParam>(2));
+
+    SmartArray<TypeParam> b(a);
+
+    EXPECT_EQ(b.size(), 2u);
+    EXPECT_EQ(b.at(0), val<TypeParam>(1));
+    EXPECT_EQ(b.at(1), val<TypeParam>(2));
+
+    // mutating b must not affect a
+    b.at(0) = val<TypeParam>(99);
+    EXPECT_EQ(a.at(0), val<TypeParam>(1));
+}
+
+TYPED_TEST(SmartArrayTest, CopyAssignmentDeepCopies) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(10));
+    a.pushBack(val<TypeParam>(20));
+
+    SmartArray<TypeParam> b;
+    b.pushBack(val<TypeParam>(99));
+    b = a;
+
+    EXPECT_EQ(b.size(), 2u);
+    EXPECT_EQ(b.at(0), val<TypeParam>(10));
+    EXPECT_EQ(b.at(1), val<TypeParam>(20));
+
+    b.at(0) = val<TypeParam>(0);
+    EXPECT_EQ(a.at(0), val<TypeParam>(10));
+}
+
+TYPED_TEST(SmartArrayTest, CopyAssignmentSelfAssignment) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(5));
+    a = a;
+    EXPECT_EQ(a.size(), 1u);
+    EXPECT_EQ(a.at(0), val<TypeParam>(5));
+}
+
+TYPED_TEST(SmartArrayTest, MoveConstructorTransfersOwnership) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(7));
+    a.pushBack(val<TypeParam>(8));
+
+    SmartArray<TypeParam> b(std::move(a));
+
+    EXPECT_EQ(b.size(), 2u);
+    EXPECT_EQ(b.at(0), val<TypeParam>(7));
+    EXPECT_EQ(b.at(1), val<TypeParam>(8));
+
+    // source must be in a valid empty state
+    EXPECT_EQ(a.size(), 0u);
+    EXPECT_TRUE(a.isEmpty());
+}
+
+TYPED_TEST(SmartArrayTest, MoveAssignmentTransfersOwnership) {
+    SmartArray<TypeParam> a;
+    a.pushBack(val<TypeParam>(3));
+    a.pushBack(val<TypeParam>(4));
+
+    SmartArray<TypeParam> b;
+    b.pushBack(val<TypeParam>(99));
+    b = std::move(a);
+
+    EXPECT_EQ(b.size(), 2u);
+    EXPECT_EQ(b.at(0), val<TypeParam>(3));
+    EXPECT_EQ(b.at(1), val<TypeParam>(4));
+
+    EXPECT_EQ(a.size(), 0u);
+    EXPECT_TRUE(a.isEmpty());
+}
