@@ -13,8 +13,8 @@
 class App {
 private:
     TaskStore _store;
-    std::vector<unsigned> _ids;        // cached task IDs in list order; index matches _entries
-    std::vector<std::string> _entries; // cached strings shown in the list pane
+    std::vector<unsigned> _ids;        // cached task IDs in list order; index matches _labels
+    std::vector<std::string> _labels; // cached strings shown in the list pane
     int _selected = 0;                 // index of the currently highlighted task
 
     void buildTreeFrom(unsigned id, int depth);

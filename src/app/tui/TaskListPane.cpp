@@ -3,12 +3,12 @@
 #include <ftxui/component/event.hpp>
 
 
-ftxui::Component MakeTaskListPane(std::vector<std::string>& entries, int& selected) {
+ftxui::Component MakeTaskListPane(std::vector<std::string>& labels, int& selected) {
     using namespace ftxui;
 
     // Menu handles arrow key navigation and updates `selected` in place.
-    // It takes raw pointers so changes to `entries` are reflected immediately.
-    auto menu = Menu(&entries, &selected);
+    // It takes raw pointers so changes to `labels` are reflected immediately.
+    auto menu = Menu(&labels, &selected);
 
     // CatchEvent intercepts j/k before Menu sees them and re-dispatches as
     // arrow keys, adding vim-style navigation without replacing the default behaviour.

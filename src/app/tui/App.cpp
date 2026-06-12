@@ -76,7 +76,7 @@ void App::buildTreeFrom(unsigned id, int depth) {
         prefix = std::string(4 * (depth-1) + 1, ' ') + "└─ ";
 
     _ids.push_back(id);
-    _entries.push_back(prefix + "[" + t.statusLabel() + "] " + t.title);
+    _labels.push_back(prefix + "[" + t.statusLabel() + "] " + t.title);
 
     // DFS on each tasks deps (blockers).
     // Duplicate tasks appear under each parent — no visited guard needed.
@@ -92,7 +92,7 @@ void App::run() {
 
     // Both panes share _selected by reference so navigating the list
     // automatically updates the detail view without any explicit sync.
-    auto list_pane   = MakeTaskListPane(_entries, _selected);
+    auto list_pane   = MakeTaskListPane(_labels, _selected);
     auto detail_pane = MakeDetailPane(_store, _ids, _selected);
 
     // Container::Horizontal routes keyboard focus between the two panes
