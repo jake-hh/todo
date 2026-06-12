@@ -20,6 +20,9 @@ struct Task {
     /** @brief Returns a name for the status value. */
     std::string statusStr() const;
 
+    /** @brief Returns a unicode symbol for the status value. */
+    std::string statusSymbol() const;
+
     /** @brief Returns a name for the priority value. */
     std::string priorityStr() const;
 

@@ -26,6 +26,17 @@ std::string Task::statusStr() const {
 }
 
 
+std::string Task::statusSymbol() const {
+    switch (status) {
+        case 0:  return "☐";
+        case 1:  return "🌟";  // ✯
+        case 2:  return "✔";
+        case 3:  return "✗";
+        default: return "?";
+    }
+}
+
+
 std::string Task::priorityStr() const {
     switch (priority) {
         case 0:  return "wishlist";
