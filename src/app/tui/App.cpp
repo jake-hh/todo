@@ -31,12 +31,28 @@ App::App() {
                                      "Push latest build to staging environment",
                                      3, 3, -1LL);
 
+        unsigned id5 = _store.create("Provision server",
+                                     "Spin up staging VM and configure firewall",
+                                     2, 0, -1LL);
+
+        unsigned id6 = _store.create("Set up CI pipeline",
+                                     "Configure GitHub Actions for staging deploys",
+                                     2, 1, -1LL);
+
+        unsigned id7 = _store.create("Obtain SSL certificate",
+                                     "Request cert from CA for staging domain",
+                                     1, 0, -1LL);
+
         // Stub deps: id0 blocked by id1, id1 blocked by id2,
-        // id3 blocked by both id4 and id1 (demonstrates a duplicate node).
+        // id3 blocked by both id1 and id4 (demonstrates a duplicate node).
+        // id4 blocked by id5, id5 blocked by id6, id6 blocked by id7
         _store.get(id0).deps.pushBack(id1);
         _store.get(id1).deps.pushBack(id2);
-        _store.get(id3).deps.pushBack(id4);
         _store.get(id3).deps.pushBack(id1);
+        _store.get(id3).deps.pushBack(id4);
+        _store.get(id4).deps.pushBack(id5);
+        _store.get(id5).deps.pushBack(id6);
+        _store.get(id6).deps.pushBack(id7);
     }
 
     // Collect IDs of all tasks that are blockers (appear in any dep list).
@@ -55,9 +71,9 @@ App::App() {
 void App::buildTreeFrom(unsigned id, int depth) {
     const Task& t = _store.get(id);
 
-    std::string prefix(depth * 2, ' ');
+    std::string prefix;
     if (depth > 0)
-        prefix += "└─ ";
+        prefix = std::string(4 * (depth-1) + 1, ' ') + "└─ ";
 
     _ids.push_back(id);
     _entries.push_back(prefix + "[" + t.statusLabel() + "] " + t.title);
