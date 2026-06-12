@@ -15,7 +15,7 @@ static std::string formatDate(int64_t epoch) {
 }
 
 
-std::string Task::statusLabel() const {
+std::string Task::statusStr() const {
     switch (status) {
         case 0:  return "open";
         case 1:  return "in-progress";
@@ -26,7 +26,7 @@ std::string Task::statusLabel() const {
 }
 
 
-std::string Task::priorityLabel() const {
+std::string Task::priorityStr() const {
     switch (priority) {
         case 0:  return "wishlist";
         case 1:  return "low";
@@ -37,11 +37,11 @@ std::string Task::priorityLabel() const {
 }
 
 
-std::string Task::dueDateLabel() const {
+std::string Task::dueDateStr() const {
     return formatDate(dueDate);
 }
 
 
-std::string Task::createdAtLabel() const {
+std::string Task::createdAtStr() const {
     return formatDate(createdAt);
 }

@@ -29,7 +29,7 @@ ftxui::Component MakeDetailPane(const TaskStore& store,
         if (t.deps.isEmpty()) {
             deps = "none";
         } else {
-            for (size_t i = 0; i < t.deps.size(); ++i) {
+            for (size_t i = 0; i < t.deps.size(); i++) {
                 if (i > 0) deps += ", ";
                 deps += std::to_string(t.deps[i]);
             }
@@ -38,10 +38,10 @@ ftxui::Component MakeDetailPane(const TaskStore& store,
         return vbox({
             field(" ID",          std::to_string(t.id)),
             field(" Title",       t.title),
-            field(" Status",      t.statusLabel()),
-            field(" Priority",    t.priorityLabel()),
-            field(" Created",     t.createdAtLabel()),
-            field(" Due",         t.dueDateLabel()),
+            field(" Status",      t.statusStr()),
+            field(" Priority",    t.priorityStr()),
+            field(" Created",     t.createdAtStr()),
+            field(" Due",         t.dueDateStr()),
             field(" Description", t.description),
             field(" Deps",        deps),
         });

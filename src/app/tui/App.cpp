@@ -76,7 +76,7 @@ void App::buildTreeFrom(unsigned id, int depth) {
         prefix = std::string(4 * (depth-1) + 1, ' ') + "└─ ";
 
     _ids.push_back(id);
-    _labels.push_back(prefix + "[" + t.statusLabel() + "] " + t.title);
+    _labels.push_back(prefix + "[" + t.statusStr() + "] " + t.title);
 
     // DFS on each tasks deps (blockers).
     // Duplicate tasks appear under each parent — no visited guard needed.
