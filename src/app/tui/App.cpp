@@ -4,6 +4,7 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/terminal.hpp>
 #include "TaskListPane.h"
 #include "DetailPane.h"
 
@@ -100,19 +101,25 @@ void App::run() {
     auto layout = Container::Horizontal({list_pane, detail_pane});
 
     // Renderer wraps the layout to add the border/title chrome around each pane.
-    // flex makes each pane grow to fill its half of the terminal width.
+    // Terminal::Size() is queried each frame so the split tracks terminal resizes.
+    // Explicit size() avoids ftxui's flex distribution, which allocates space as
+    // min_size + extra/2 per pane — causing widths to jump when detail content
+    // changes natural width on each selection change.
     auto renderer = Renderer(layout, [&] {
+        int w = Terminal::Size().dimx;
+        int left_w  = w / 2;
+        int right_w = w - left_w;
         return hbox({
             vbox({
                 text(" Tasks") | bold,
                 separator(),
                 list_pane->Render() | flex,
-            }) | border | flex,
+            }) | border | size(WIDTH, EQUAL, left_w),
             vbox({
                 text(" Details") | bold,
                 separator(),
                 detail_pane->Render() | flex,
-            }) | border | flex,
+            }) | border | size(WIDTH, EQUAL, right_w),
         });
     });
 
