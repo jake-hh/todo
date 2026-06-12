@@ -17,6 +17,8 @@ private:
     std::vector<std::string> _entries; // cached strings shown in the list pane
     int _selected = 0;                 // index of the currently highlighted task
 
+    void buildTreeFrom(unsigned id, int depth);
+
 public:
     App();
 

@@ -1,5 +1,6 @@
 #include "App.h"
 
+#include <set>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
@@ -8,33 +9,63 @@
 
 
 App::App() {
-    // Hardcoded seed tasks — placeholder until FileIO is wired up.
-    _store.create("Fix login bug",
-                  "Users cannot log in when using OAuth",
-                  3, 0, 1800000000LL);
+    // Hardcode seed tasks with stub deps to demonstrate the tree view.
+    {
+        unsigned id0 = _store.create("Fix login bug",
+                                     "Users cannot log in when using OAuth",
+                                     3, 0, 1800000000LL);
 
-    _store.create("Write unit tests",
-                  "Cover TaskStore CRUD operations",
-                  2, 1, -1LL);
+        unsigned id1 = _store.create("Write unit tests",
+                                     "Cover TaskStore CRUD operations",
+                                     2, 1, -1LL);
 
-    _store.create("Update documentation",
-                  "Align README with new API",
-                  1, 0, 1802000000LL);
+        unsigned id2 = _store.create("Update documentation",
+                                     "Align README with new API",
+                                     1, 0, 1802000000LL);
 
-    _store.create("Refactor data layer",
-                  "Extract serialization into FileIO",
-                  2, 2, -1LL);
+        unsigned id3 = _store.create("Refactor data layer",
+                                     "Extract serialization into FileIO",
+                                     2, 2, -1LL);
 
-    _store.create("Deploy to staging",
-                  "Push latest build to staging environment",
-                  3, 3, -1LL);
+        unsigned id4 = _store.create("Deploy to staging",
+                                     "Push latest build to staging environment",
+                                     3, 3, -1LL);
 
-    // Build the parallel caches.
-    // std::map iterates in ID order so the resulting vectors are sorted by ID.
-    for (auto& [id, task] : _store.tasks()) {
-        _ids.push_back(id);
-        _entries.push_back("[" + task.statusLabel() + "] " + task.title);
+        // Stub deps: id0 blocked by id1, id1 blocked by id2,
+        // id3 blocked by both id4 and id1 (demonstrates a duplicate node).
+        _store.get(id0).deps.pushBack(id1);
+        _store.get(id1).deps.pushBack(id2);
+        _store.get(id3).deps.pushBack(id4);
+        _store.get(id3).deps.pushBack(id1);
     }
+
+    // Collect IDs of all tasks that are blockers (appear in any dep list).
+    std::set<unsigned> allDeps;
+    for (auto& [id, task] : _store.tasks())
+        for (size_t i = 0; i < task.deps.size(); i++)
+            allDeps.insert(task.deps[i]);
+
+    // Start building on tree roots - tasks that no other task depend on.
+    for (auto& [id, task] : _store.tasks())
+        if (!allDeps.count(id))
+            buildTreeFrom(id, 0);
+}
+
+
+void App::buildTreeFrom(unsigned id, int depth) {
+    const Task& t = _store.get(id);
+
+    std::string prefix(depth * 2, ' ');
+    if (depth > 0)
+        prefix += "└─ ";
+
+    _ids.push_back(id);
+    _entries.push_back(prefix + "[" + t.statusLabel() + "] " + t.title);
+
+    // DFS on each tasks deps (blockers).
+    // Duplicate tasks appear under each parent — no visited guard needed.
+    for (size_t i = 0; i < t.deps.size(); i++)
+        buildTreeFrom(t.deps[i], depth + 1);
 }
 
 
